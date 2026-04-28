@@ -1,0 +1,65 @@
+services:
+  web:
+    build:
+      context: .
+    user: "${UID:-1000}:${GID:-1000}"
+    command: bash -lc "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 3000"
+    ports:
+      - "3000:3000"
+    environment:
+      RAILS_ENV: development
+      HOME: /tmp
+      PORT: 3000
+      DATABASE_URL: postgres://postgres:postgres@db:5432/RES_Project_development
+      REDISCLOUD_URL: redis://redis:6379/1
+      CLOUDINARY_URL: ${CLOUDINARY_URL:-}
+      MAPBOX_API_KEY: ${MAPBOX_API_KEY:-}
+    volumes:
+      - .:/rails
+      - bundle:/usr/local/bundle
+      - node_modules:/rails/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    stdin_open: true
+    tty: true
+
+  js:
+    build:
+      context: .
+    user: "${UID:-1000}:${GID:-1000}"
+    command: bash -lc "yarn install --check-files && yarn build --watch"
+    environment:
+      HOME: /tmp
+      NODE_ENV: development
+    volumes:
+      - .:/rails
+      - bundle:/usr/local/bundle
+      - node_modules:/rails/node_modules
+
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: RES_Project_development
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d RES_Project_development"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+
+volumes:
+  bundle:
+  node_modules:
+  postgres_data:
+  redis_data:

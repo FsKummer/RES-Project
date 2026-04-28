@@ -37,10 +37,20 @@ class PagesController < ApplicationController
   end
 
   def calculator
-    return unless params[:pointa] && params[:pointb]
+    return unless params[:pointa].present? || params[:pointb].present?
+
+    unless params[:pointa].present? && params[:pointb].present?
+      @geocoding_error = "Enter both locations before calculating."
+      return
+    end
 
     point_a = latlong(params[:pointa])
     point_b = latlong(params[:pointb])
+    unless point_a && point_b
+      @geocoding_error = "Could not find coordinates for one of those locations."
+      return
+    end
+
     @great_circle = calculate_gc(point_a, point_b)
     @rhumb_dist = calculate_rhumb(point_a, point_b)
   end
@@ -67,7 +77,7 @@ class PagesController < ApplicationController
   end
 
   def latlong(address)
-    Geocoder.search(address).first.coordinates
+    Geocoder.search(address).first&.coordinates
   end
 
   def calculate_gc(a, b)
