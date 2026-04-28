@@ -16,4 +16,4 @@ Build and start the app:
 docker compose up --build
 ```
 
-The Rails app runs at http://localhost:3000. Compose also starts internal Postgres and Redis services, plus a webpack watcher for `app/assets/builds/application.js`.
+The Rails app runs at http://localhost:3000. Compose uses SQLite files under `storage/`, starts Redis for Action Cable, and runs a webpack watcher for `app/assets/builds/application.js`.

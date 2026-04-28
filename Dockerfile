@@ -15,10 +15,10 @@ RUN apt-get update -qq && \
       libglib2.0-0 \
       libglib2.0-dev \
       libpoppler-glib8 \
-      libpq-dev \
+      libsqlite3-dev \
       libvips-dev \
       pkg-config \
-      postgresql-client && \
+      sqlite3 && \
     gem install bundler:2.3.25 && \
     rm -rf /var/lib/apt/lists/*
 

@@ -5,7 +5,8 @@ class ArticlesController < ApplicationController
   def index
     skip_policy_scope
     if params[:query].present?
-      @articles = Article.where("title ILIKE ? AND accepted = ?", "%#{params[:query]}%", true)
+      query = Article.sanitize_sql_like(params[:query].downcase)
+      @articles = Article.where("LOWER(title) LIKE ? AND accepted = ?", "%#{query}%", true)
     else
       @articles = Article.where(accepted: true).order("created_at DESC")
     end
